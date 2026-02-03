@@ -1,0 +1,15 @@
+# Ignore Python Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Ignore Audio Recordings (privacy & size)
+recordings/
+
+# Ignore Environment Variables (Security!)
+.env
+
+# Ignore Frontend Dependencies (if you have the frontend folder here)
+node_modules/
+dist/
+.DS_Store

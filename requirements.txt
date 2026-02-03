@@ -1,0 +1,8 @@
+sounddevice
+numpy
+scipy
+openai-whisper
+torch
+fastapi 
+uvicorn 
+python-multipart
