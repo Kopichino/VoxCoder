@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-to-Code Web IDE</title>
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/eclipse.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-mode">
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="icon">🎙️</span>
+                <h1>Verbal<span class="highlight">Py</span></h1>
+            </div>
+            <div class="controls">
+                <button id="run-btn" class="btn-primary" title="Run Code">
+                    ▶ Run
+                </button>
+                <button id="theme-toggle" class="btn-icon" title="Toggle Theme">🌙</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main>
+            <!-- Code Editor Section -->
+            <section class="editor-section">
+                <div class="panel-header">
+                    <span class="filename">generated_script.py</span>
+                    <div class="editor-actions">
+                        <span id="status-indicator">Saved</span>
+                    </div>
+                </div>
+                <div id="editor-container"></div>
+                
+                <!-- Terminal Section (New) -->
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <span>Terminal Output</span>
+                        <button id="clear-term" class="btn-text">Clear</button>
+                    </div>
+                    <div class="terminal-body" id="terminal-output">
+                        <div class="term-line">Ready to run...</div>
+                    </div>
+                    <!-- Simple Input Field for stdin -->
+                    <div class="terminal-input-area">
+                         <input type="text" id="stdin-input" placeholder="Optional: Enter input for script here..." />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Voice Control Section -->
+            <section class="voice-section">
+                <div class="voice-status">
+                    <p id="instruction-display">Press the mic pattern to speak...</p>
+                </div>
+                
+                <div class="mic-wrapper">
+                    <button id="record-btn" class="mic-btn">
+                        <div class="mic-icon">🎤</div>
+                        <div class="pulse-ring"></div>
+                    </button>
+                </div>
+
+                <div class="transcription-log">
+                    <h3>Command Log</h3>
+                    <ul id="log-list">
+                        <!-- Transcriptions go here -->
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>

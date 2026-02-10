@@ -45,7 +45,14 @@ def generate_code(prompt, current_code=""):
             ],
             temperature=0.1,
         )
-        return completion.choices[0].message.content
+        code = completion.choices[0].message.content
+        # Post-process to remove markdown
+        if code.startswith("```python"):
+            code = code.replace("```python", "").replace("```", "")
+        elif code.startswith("```"):
+            code = code.replace("```", "")
+        # Remove any leading/trailing whitespace
+        return code.strip()
     except Exception as e:
         print(f"❌ Error: {e}")
         return "# Error generating code."
