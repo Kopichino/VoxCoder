@@ -1,15 +1,16 @@
-def is_prime(n):
-    if n <= 1:
-        return False
-    if n == 2:
-        return True
-    if n % 2 == 0:
-        return False
-    max_divisor = int(n**0.5) + 1
-    for d in range(3, max_divisor, 2):
-        if n % d == 0:
-            return False
-    return True
+print('hello')
 
-def find_primes(n):
-    return [i for i in range(2, n+1) if is_prime(i)]
+def fibonacci(n):
+    if n <= 0:
+        return "Input should be a positive integer."
+    elif n == 1:
+        return 0
+    elif n == 2:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range(n - 2):
+            a, b = b, a + b
+        return b
+
+print(fibonacci(10))

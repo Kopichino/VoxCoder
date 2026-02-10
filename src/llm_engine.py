@@ -8,37 +8,44 @@ from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY") 
 
-def generate_code(prompt):
+def generate_code(prompt, current_code=""):
     """
-    Sends text to Llama 3 on Groq and returns clean Python code.
+    Generates or Edits code based on the user's instruction.
     """
-    print("🧠 Sending to Llama 3 (via Groq)...")
-    
-    client = Groq(api_key=API_KEY)
+    if not API_KEY:
+        return "# Error: Missing API Key"
 
-    # We use a "System Prompt" to tell the AI how to behave
-    system_instruction = (
-        "You are an expert Python coding assistant. "
-        "The user will give you a logic or algorithm in plain English. "
-        "You must output ONLY valid Python code. "
-        "Do not explain the code. Do not wrap in markdown backticks (```). "
-        "Just raw code."
-    )
+    print(f"🧠 Sending to Llama 3.1...")
+
+    # logic: If there is code, we are EDITING. If not, we are CREATING.
+    if current_code and current_code.strip() != "":
+        system_instruction = (
+            "You are an expert Python code editor. "
+            "You will be given 'Current Code' and a 'User Instruction'. "
+            "Your job is to apply the user's instruction to the Current Code. "
+            "Return the FULL updated code. Do not shorten it. "
+            "Output ONLY valid Python code. No markdown."
+        )
+        user_content = f"Current Code:\n{current_code}\n\nUser Instruction:\n{prompt}"
+    else:
+        system_instruction = (
+            "You are an expert Python coding assistant. "
+            "Output ONLY valid Python code based on the user's instruction. "
+            "No markdown, no explanations."
+        )
+        user_content = prompt
 
     try:
+        client = Groq(api_key=API_KEY)
         completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",  # Fast and smart enough model
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": user_content}
             ],
-            temperature=0.1,  # Low temperature = more precise code
+            temperature=0.1,
         )
-        
-        code = completion.choices[0].message.content
-        print("✅ Code generated!")
-        return code
-
+        return completion.choices[0].message.content
     except Exception as e:
-        print(f"❌ Error generating code: {e}")
+        print(f"❌ Error: {e}")
         return "# Error generating code."
