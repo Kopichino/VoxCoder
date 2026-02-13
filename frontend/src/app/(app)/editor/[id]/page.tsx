@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
 import styles from './editor.module.css';
 
-// CodeMirror imports
+// CodeMirror — all from the meta-package to avoid duplicate instances
 import { EditorView, basicSetup } from 'codemirror';
 import { EditorState } from '@codemirror/state';
 import { python } from '@codemirror/lang-python';
@@ -38,6 +38,11 @@ export default function EditorPage() {
   // Voice states
   const [isRecording, setIsRecording] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState('Press mic to speak...');
+
+  // Auto-analysis state
+  const [analysisResult, setAnalysisResult] = useState<{question_name: string; topic: string; data_structure: string; difficulty: string} | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const analyzeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -76,6 +81,15 @@ export default function EditorPage() {
         basicSetup,
         python(),
         oneDark,
+        EditorView.theme({
+          '&': { height: '100%', fontSize: '14px' },
+          '.cm-scroller': { fontFamily: "'JetBrains Mono', 'Fira Code', monospace" },
+          '.cm-content': { padding: '12px 0' },
+          '.cm-gutters': { backgroundColor: '#1e1e2e', border: 'none' },
+          '.cm-activeLine': { backgroundColor: '#2a2a3e' },
+          '.cm-activeLineGutter': { backgroundColor: '#2a2a3e' },
+        }, { dark: true }),
+        EditorState.tabSize.of(4),
         EditorView.updateListener.of(update => {
           if (update.docChanged) {
             setSavedStatus('unsaved');
@@ -85,11 +99,6 @@ export default function EditorPage() {
               autoSave(update.state.doc.toString());
             }, 1500);
           }
-        }),
-        EditorView.theme({
-          '&': { height: '100%', fontSize: '14px' },
-          '.cm-scroller': { fontFamily: "'JetBrains Mono', monospace" },
-          '.cm-content': { padding: '12px 0' },
         }),
       ],
     });
@@ -108,6 +117,30 @@ export default function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project]);
 
+  // Auto-analyze code with AI (debounced)
+  const triggerAnalysis = useCallback((code: string, projectId: string | string[]) => {
+    if (analyzeTimeoutRef.current) clearTimeout(analyzeTimeoutRef.current);
+    analyzeTimeoutRef.current = setTimeout(async () => {
+      if (!code || code.trim().length < 15 || code.trim() === '# Start coding here...') return;
+      setAnalyzing(true);
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, project_id: Number(projectId) }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAnalysisResult(data.analysis);
+        }
+      } catch {
+        // Silent fail for analysis
+      } finally {
+        setAnalyzing(false);
+      }
+    }, 3000); // 3s debounce for analysis
+  }, []);
+
   const autoSave = useCallback(async (code: string) => {
     setSavedStatus('saving');
     try {
@@ -117,10 +150,12 @@ export default function EditorPage() {
         body: JSON.stringify({ code }),
       });
       setSavedStatus('saved');
+      // Trigger auto-analysis after save
+      triggerAnalysis(code, id as string);
     } catch {
       setSavedStatus('unsaved');
     }
-  }, [id]);
+  }, [id, triggerAnalysis]);
 
   const handleSave = async () => {
     if (!viewRef.current) return;
@@ -135,6 +170,8 @@ export default function EditorPage() {
       });
       setSavedStatus('saved');
       showToast('Saved!', 'success');
+      // Trigger analysis
+      triggerAnalysis(code, id as string);
     } catch {
       showToast('Failed to save', 'error');
       setSavedStatus('unsaved');
@@ -268,6 +305,12 @@ export default function EditorPage() {
             <span className={styles.statusText}>
               {savedStatus === 'saved' ? 'Saved' : savedStatus === 'saving' ? 'Saving...' : 'Unsaved'}
             </span>
+            {analyzing && <span className={styles.analyzingBadge}>🔍 Analyzing...</span>}
+            {analysisResult && !analyzing && (
+              <span className={styles.analysisBadge} title={`${analysisResult.question_name} | ${analysisResult.topic} | ${analysisResult.data_structure} | ${analysisResult.difficulty}`}>
+                🧠 {analysisResult.question_name}
+              </span>
+            )}
           </div>
         </div>
         <div className={styles.headerRight}>

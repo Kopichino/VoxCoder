@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { project_id, topic, data_structure, difficulty } = await req.json();
+  const { project_id, topic, data_structure, difficulty, question_name } = await req.json();
 
   if (!topic) {
     return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
 
   const db = getDb();
   const result = db.prepare(
-    'INSERT INTO submissions (user_id, project_id, topic, data_structure, difficulty) VALUES (?, ?, ?, ?, ?)'
-  ).run(user.id, project_id || null, topic, data_structure || 'None', difficulty || 'Medium');
+    'INSERT INTO submissions (user_id, project_id, question_name, topic, data_structure, difficulty) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(user.id, project_id || null, question_name || '', topic, data_structure || 'None', difficulty || 'Medium');
 
   return NextResponse.json({
     submission: { id: result.lastInsertRowid },

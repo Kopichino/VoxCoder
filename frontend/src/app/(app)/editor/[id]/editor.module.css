@@ -297,6 +297,35 @@
   color: var(--text-muted);
 }
 
+/* Analysis badges */
+.analyzingBadge {
+  font-size: 0.6875rem;
+  color: var(--text-accent);
+  background: rgba(108, 99, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  animation: pulse 1s infinite;
+}
+
+.analysisBadge {
+  font-size: 0.6875rem;
+  color: var(--accent-secondary);
+  background: rgba(237, 100, 166, 0.1);
+  padding: 2px 10px;
+  border-radius: 10px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+  transition: all var(--transition-fast);
+}
+
+.analysisBadge:hover {
+  max-width: 400px;
+  background: rgba(237, 100, 166, 0.18);
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
