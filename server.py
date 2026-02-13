@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import os
 import subprocess
 from src.llm_engine import generate_code
 from src.transcriber import transcribe_audio
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 # Ensure recordings directory exists
 if not os.path.exists("recordings"):

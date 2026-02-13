@@ -1,46 +1,26 @@
-print('hello')
+# Start coding here...
 
-def fibonacci(n):
-    if n <= 0:
-        return "Input should be a positive integer."
-    elif n == 1:
-        return 0
-    elif n == 2:
-        return 1
-    else:
-        a, b = 0, 1
-        for _ in range(n - 2):
-            a, b = b, a + b
-        return b
+def find_prime_numbers(n):
+    """
+    This function finds all prime numbers up to n.
 
-def find_primes(n):
-    primes = []
+    Args:
+        n (int): The upper limit for finding prime numbers.
+
+    Returns:
+        list: A list of prime numbers up to n.
+    """
+    prime_numbers = []
     for possiblePrime in range(2, n + 1):
+        # Assume number is prime until shown it is not.
         isPrime = True
         for num in range(2, int(possiblePrime ** 0.5) + 1):
             if possiblePrime % num == 0:
                 isPrime = False
                 break
         if isPrime:
-            primes.append(possiblePrime)
-    return primes
+            prime_numbers.append(possiblePrime)
+    return prime_numbers
 
-def find_even_numbers(n):
-    even_numbers = []
-    for num in range(2, n + 1):
-        if num % 2 == 0:
-            even_numbers.append(num)
-    return even_numbers
-
-def find_odd_numbers(n):
-    odd_numbers = []
-    for num in range(2, n + 1):
-        if num % 2 != 0:
-            odd_numbers.append(num)
-    return odd_numbers
-
-print(fibonacci(10))
-print(find_primes(30))
-print(find_even_numbers(20))
-print(find_odd_numbers(20))
-print('Hello')
+# Example usage:
+print(find_prime_numbers(30))  # Output: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
