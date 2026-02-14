@@ -16,6 +16,18 @@ interface Project {
   updated_at: string;
 }
 
+interface Gamification {
+  xp: number;
+  level: number;
+  badge: string;
+  streak: number;
+  longestStreak: number;
+  xpForCurrentLevel: number;
+  xpForNextLevel: number;
+  xpProgress: number;
+  xpNeeded: number;
+}
+
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +35,7 @@ export default function DashboardPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [creating, setCreating] = useState(false);
+  const [gamification, setGamification] = useState<Gamification | null>(null);
   const { user } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
@@ -39,9 +52,22 @@ export default function DashboardPage() {
     }
   }, [showToast]);
 
+  const fetchGamification = useCallback(async () => {
+    try {
+      const res = await fetch('/api/analytics');
+      const data = await res.json();
+      if (data.gamification) {
+        setGamification(data.gamification);
+      }
+    } catch {
+      // Silent fail for gamification
+    }
+  }, []);
+
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    fetchGamification();
+  }, [fetchProjects, fetchGamification]);
 
   const createProject = async () => {
     if (!newTitle.trim()) return;
@@ -100,6 +126,10 @@ export default function DashboardPage() {
     return lines.join('\n');
   };
 
+  const xpPercent = gamification
+    ? Math.min(100, (gamification.xpProgress / gamification.xpNeeded) * 100)
+    : 0;
+
   return (
     <div className={styles.dashboard}>
       {/* Hero Banner */}
@@ -123,6 +153,65 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ─── Gamification Card ────────────────────────────── */}
+      {gamification && (
+        <div className={styles.gamificationRow}>
+          {/* Streak Card */}
+          <div className={styles.streakCard}>
+            <div className={styles.streakFireWrap}>
+              <span className={`${styles.streakFire} ${gamification.streak > 0 ? styles.streakFireActive : ''}`}>
+                🔥
+              </span>
+            </div>
+            <div className={styles.streakInfo}>
+              <span className={styles.streakCount}>{gamification.streak}</span>
+              <span className={styles.streakLabel}>Day Streak</span>
+              <span className={styles.streakBest}>Best: {gamification.longestStreak} days</span>
+            </div>
+          </div>
+
+          {/* XP & Level Card */}
+          <div className={styles.xpCard}>
+            <div className={styles.xpHeader}>
+              <div className={styles.levelBadge}>
+                <span className={styles.levelIcon}>{gamification.badge.split(' ')[0]}</span>
+                <div>
+                  <span className={styles.levelName}>{gamification.badge.split(' ').slice(1).join(' ')}</span>
+                  <span className={styles.levelNumber}>Level {gamification.level}</span>
+                </div>
+              </div>
+              <span className={styles.xpTotal}>{gamification.xp} XP</span>
+            </div>
+            <div className={styles.xpBarWrap}>
+              <div className={styles.xpBar}>
+                <div
+                  className={styles.xpBarFill}
+                  style={{ width: `${xpPercent}%` }}
+                />
+              </div>
+              <div className={styles.xpLabels}>
+                <span>{gamification.xpForCurrentLevel} XP</span>
+                <span>{gamification.xpForNextLevel} XP</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className={styles.quickStats}>
+            <div className={styles.qStat}>
+              <span className={styles.qIcon}>✅</span>
+              <span className={styles.qVal}>{gamification.xp > 0 ? Math.floor(gamification.xp / 10) : 0}</span>
+              <span className={styles.qLabel}>Solved</span>
+            </div>
+            <div className={styles.qStat}>
+              <span className={styles.qIcon}>⚡</span>
+              <span className={styles.qVal}>+{gamification.streak * 5}</span>
+              <span className={styles.qLabel}>Streak XP</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Projects Section */}
       <div className={styles.section}>

@@ -8,6 +8,7 @@ import styles from './Sidebar.module.css';
 const NAV_ITEMS = [
   { path: '/dashboard', icon: '📊', label: 'Dashboard' },
   { path: '/editor', icon: '💻', label: 'Editor' },
+  { path: '/practice', icon: '🧪', label: 'Practice' },
   { path: '/analytics', icon: '📈', label: 'Analytics' },
   { path: '/materials', icon: '📚', label: 'Materials' },
 ];
